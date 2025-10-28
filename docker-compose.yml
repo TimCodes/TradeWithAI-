@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: alpha-arena-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: alpha_arena
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: ["postgres", "-c", "shared_preload_libraries=timescaledb"]
+
+  redis:
+    image: redis:7-alpine
+    container_name: alpha-arena-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    container_name: alpha-arena-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      DB_DATABASE: alpha_arena
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: your-jwt-secret-change-this
+      KRAKEN_API_KEY: your-kraken-api-key
+      KRAKEN_API_SECRET: your-kraken-api-secret
+      ANTHROPIC_API_KEY: your-anthropic-api-key
+      OPENAI_API_KEY: your-openai-api-key
+      GOOGLE_API_KEY: your-google-api-key
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./packages/server:/app
+      - /app/node_modules
+
+  client:
+    build:
+      context: .
+      dockerfile: packages/client/Dockerfile
+    container_name: alpha-arena-client
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3000
+      VITE_WS_URL: ws://localhost:3000
+    depends_on:
+      - server
+    volumes:
+      - ./packages/client:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+  redis_data:
