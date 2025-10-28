@@ -141,20 +141,25 @@ TradeWithAI is an AI-powered autonomous trading platform currently in active dev
 **2.1 WebSocket Market Data Service**
 - **Story Points**: 8
 - **Description**: As a trader, I need real-time price updates to make informed decisions
+- **Status**: ✅ **COMPLETE** (October 28, 2025)
 - **Acceptance Criteria**:
-  - [ ] Create MarketDataService with Kraken WebSocket connection
-  - [ ] Implement auto-reconnection with exponential backoff
-  - [ ] Subscribe to ticker data for BTC/USD, ETH/USD
-  - [ ] Subscribe to order book depth updates
-  - [ ] Store OHLCV data in TimescaleDB hypertable
-  - [ ] Implement data retention policies
-  - [ ] Add connection health monitoring
-  - [ ] Handle WebSocket errors gracefully
+  - [x] Create MarketDataService with Kraken WebSocket connection
+  - [x] Implement auto-reconnection with exponential backoff
+  - [x] Subscribe to ticker data for BTC/USD, ETH/USD
+  - [x] Subscribe to order book depth updates
+  - [x] Store OHLCV data in TimescaleDB hypertable
+  - [x] Implement data retention policies
+  - [x] Add connection health monitoring
+  - [x] Handle WebSocket errors gracefully
 - **Dependencies**: None
-- **Files to Create**:
-  - `packages/server/src/modules/market-data/market-data.service.ts`
-  - `packages/server/src/modules/market-data/market-data.controller.ts`
-  - `packages/server/src/modules/market-data/entities/ohlcv.entity.ts`
+- **Files Created**:
+  - `packages/server/src/modules/market-data/market-data.service.ts` ✅
+  - `packages/server/src/modules/market-data/market-data.controller.ts` ✅
+  - `packages/server/src/modules/market-data/entities/ohlcv.entity.ts` ✅
+  - `packages/server/src/modules/market-data/dto/market-data.dto.ts` ✅
+  - `packages/server/src/modules/market-data/market-data.module.ts` ✅
+  - `packages/server/src/migrations/1730160000000-CreateMarketDataTables.ts` ✅
+  - `packages/server/src/modules/market-data/README.md` ✅
 
 **2.2 Historical Data Management**
 - **Story Points**: 5
