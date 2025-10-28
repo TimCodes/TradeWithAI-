@@ -5,7 +5,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
-              Alpha Arena
+              TradeWithAI
             </h1>
             <nav className="flex space-x-6">
               <a href="/" className="text-slate-300 hover:text-white transition-colors">

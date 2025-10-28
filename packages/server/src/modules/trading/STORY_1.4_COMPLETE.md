@@ -8,7 +8,7 @@
 
 ## 📋 Overview
 
-Story 1.4 focused on fully integrating the Trading Module into the Alpha Arena application with proper configuration, validation, error handling, logging, and health checks.
+Story 1.4 focused on fully integrating the Trading Module into the TradeWithAI application with proper configuration, validation, error handling, logging, and health checks.
 
 ---
 
