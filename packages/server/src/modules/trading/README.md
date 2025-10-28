@@ -2,7 +2,9 @@
 
 ## Overview
 
-This module provides integration with the Kraken cryptocurrency exchange API, enabling real-time trading functionality for the Alpha Arena platform.
+# Trading Module
+
+This module provides integration with the Kraken cryptocurrency exchange API, enabling real-time trading functionality for the TradeWithAI platform.
 
 ## Features
 
@@ -292,4 +294,4 @@ This implementation completes **Story 1.1** of the project roadmap. Next stories
 
 ## License
 
-Part of the Alpha Arena project. See main project README for license information.
+Part of the TradeWithAI project. See main project README for license information.

@@ -1,7 +1,7 @@
 {
   "name": "@alpha-arena/server",
   "version": "1.0.0",
-  "description": "Alpha Arena Backend API",
+  "description": "TradeWithAI Backend API",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

@@ -1,4 +1,4 @@
-# Alpha Arena - Project Roadmap & Sprint Planning
+# TradeWithAI - Project Roadmap & Sprint Planning
 
 **Project Status**: 35% Complete  
 **Target MVP Date**: December 15, 2025 (6-8 weeks)  
@@ -8,7 +8,7 @@
 
 ## 🎯 Executive Summary
 
-Alpha Arena is an AI-powered autonomous trading platform currently in active development. The project has a solid foundation with infrastructure, authentication, and LLM provider integration mostly complete. **Epic 1 (Trading Execution Engine) is now complete!** Real-time data feeds, WebSocket infrastructure, and interactive UI components are the next priorities.
+TradeWithAI is an AI-powered autonomous trading platform currently in active development. The project has a solid foundation with infrastructure, authentication, and LLM provider integration mostly complete. **Epic 1 (Trading Execution Engine) is now complete!** Real-time data feeds, WebSocket infrastructure, and interactive UI components are the next priorities.
 
 ### Completed ✅:
 - ✅ Trading execution capability (Epic 1)

@@ -8,7 +8,7 @@
 
 ## Overview
 
-Story 1.2 implements a comprehensive Order Management System for the Alpha Arena trading platform. This system handles order creation, execution, position tracking, and trade history with full database persistence and queue-based processing.
+Story 1.2 implements a comprehensive Order Management System for the TradeWithAI trading platform. This system handles order creation, execution, position tracking, and trade history with full database persistence and queue-based processing.
 
 ---
 

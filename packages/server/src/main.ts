@@ -26,7 +26,7 @@ async function bootstrap() {
 
   // Swagger documentation
   const config = new DocumentBuilder()
-    .setTitle('Alpha Arena API')
+    .setTitle('TradeWithAI API')
     .setDescription('AI-Powered Autonomous Trading Platform API')
     .setVersion('1.0')
     .addBearerAuth()
@@ -36,8 +36,8 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`🚀 Alpha Arena API running on http://localhost:${port}`);
-  console.log(`📚 API Documentation available at http://localhost:${port}/api/docs`);
+  console.log(`🚀 TradeWithAI API running on http://localhost:${port}`);
+  console.log(`📚 API Documentation available at http://localhost:${port}/api`);
 }
 
 bootstrap();

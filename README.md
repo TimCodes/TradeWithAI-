@@ -1,6 +1,6 @@
-# Alpha Arena - AI-Powered Autonomous Trading Platform
+# TradeWithAI - AI-Powered Autonomous Trading Platform
 
-Alpha Arena is a sophisticated trading platform that leverages multiple Large Language Models (LLMs) to make autonomous trading decisions. The platform provides a comprehensive trading environment with real-time market data, risk management, and advanced analytics.
+TradeWithAI is a sophisticated trading platform that leverages multiple Large Language Models (LLMs) to make autonomous trading decisions. The platform provides a comprehensive trading environment with real-time market data, risk management, and advanced analytics.
 
 ## 🚀 Features
 
