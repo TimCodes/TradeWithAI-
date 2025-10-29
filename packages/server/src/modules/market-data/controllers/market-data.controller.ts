@@ -16,6 +16,8 @@ import {
   SubscribeMarketDataDto,
   UnsubscribeMarketDataDto,
   GetHistoricalDataDto,
+  BackfillRequestDto,
+  BackfillStatusDto,
   TickerDataDto,
   OrderBookDto,
   OHLCVDto,
@@ -123,5 +125,41 @@ export class MarketDataController {
       endDate,
       limit,
     );
+  }
+
+  @Post('backfill')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Backfill historical OHLCV data from Kraken' })
+  @ApiResponse({ status: 200, description: 'Backfill status', type: BackfillStatusDto })
+  @ApiResponse({ status: 400, description: 'Invalid request parameters' })
+  async backfillHistoricalData(
+    @Body() dto: BackfillRequestDto,
+  ): Promise<BackfillStatusDto> {
+    this.logger.log(`Starting backfill for ${dto.symbol} ${dto.timeframe}`);
+    
+    const startDate = new Date(dto.startDate);
+    const endDate = dto.endDate ? new Date(dto.endDate) : new Date();
+
+    const result = await this.marketDataService.backfillHistoricalData(
+      dto.symbol,
+      dto.timeframe,
+      startDate,
+      endDate,
+    );
+
+    return {
+      success: result.success,
+      message: result.message,
+      candlesImported: result.candlesImported,
+      startDate,
+      endDate,
+    };
+  }
+
+  @Get('cache/stats')
+  @ApiOperation({ summary: 'Get cache statistics' })
+  @ApiResponse({ status: 200, description: 'Cache statistics' })
+  getCacheStats() {
+    return this.marketDataService.getCacheStats();
   }
 }

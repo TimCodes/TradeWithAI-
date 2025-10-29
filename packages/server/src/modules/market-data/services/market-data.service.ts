@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import WebSocket from 'ws';
+import axios from 'axios';
 import { OHLCVEntity } from '../entities/ohlcv.entity';
 import {
   TickerDataDto,
@@ -45,6 +46,14 @@ export class MarketDataService implements OnModuleInit, OnModuleDestroy {
   // In-memory cache for latest data
   private tickerCache = new Map<string, TickerDataDto>();
   private orderBookCache = new Map<string, OrderBookDto>();
+  
+  // Cache for historical OHLCV data (key: symbol:timeframe:start:end)
+  private ohlcvCache = new Map<string, { data: OHLCVDto[]; timestamp: number }>();
+  private readonly cacheTTL = 60000; // 60 seconds cache TTL
+  
+  // Kraken REST API configuration
+  private readonly krakenRestUrl = 'https://api.kraken.com/0/public';
+  private readonly krakenRateLimit = 1000; // 1 request per second for public API
 
   constructor(
     @InjectRepository(OHLCVEntity)
@@ -453,7 +462,7 @@ export class MarketDataService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Get historical OHLCV data
+   * Get historical OHLCV data with caching
    */
   async getHistoricalData(
     symbol: string,
@@ -463,6 +472,16 @@ export class MarketDataService implements OnModuleInit, OnModuleDestroy {
     limit: number = 100,
   ): Promise<OHLCVDto[]> {
     try {
+      // Generate cache key
+      const cacheKey = `${symbol}:${timeframe}:${startDate?.getTime() || 'null'}:${endDate?.getTime() || 'null'}:${limit}`;
+      
+      // Check cache
+      const cached = this.ohlcvCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
+        this.logger.debug(`Cache hit for historical data: ${cacheKey}`);
+        return cached.data;
+      }
+
       const queryBuilder = this.ohlcvRepository
         .createQueryBuilder('ohlcv')
         .where('ohlcv.symbol = :symbol', { symbol })
@@ -484,7 +503,7 @@ export class MarketDataService implements OnModuleInit, OnModuleDestroy {
         .limit(limit)
         .getMany();
 
-      return results.map((r) => ({
+      const data = results.map((r) => ({
         timestamp: r.timestamp,
         open: parseFloat(r.open),
         high: parseFloat(r.high),
@@ -493,11 +512,221 @@ export class MarketDataService implements OnModuleInit, OnModuleDestroy {
         volume: parseFloat(r.volume),
         trades: r.trades,
       })).reverse(); // Return in chronological order
+      
+      // Cache the result
+      this.ohlcvCache.set(cacheKey, { data, timestamp: Date.now() });
+      
+      return data;
     } catch (error) {
       const err = error as Error;
       this.logger.error(`Error fetching historical data: ${err.message}`);
       return [];
     }
+  }
+
+  /**
+   * Backfill historical OHLCV data from Kraken REST API
+   */
+  async backfillHistoricalData(
+    symbol: string,
+    timeframe: Timeframe,
+    startDate: Date,
+    endDate?: Date,
+  ): Promise<{ success: boolean; candlesImported: number; message: string }> {
+    const end = endDate || new Date();
+    this.logger.log(`Starting backfill for ${symbol} ${timeframe} from ${startDate} to ${end}`);
+
+    try {
+      // Convert timeframe to Kraken interval (in minutes)
+      const intervalMinutes = this.timeframeToMinutes(timeframe);
+      
+      // Kraken returns data in reverse chronological order, max 720 candles per request
+      const maxCandlesPerRequest = 720;
+      const krakenSymbol = this.toKrakenSymbol(symbol);
+      
+      let currentStart = startDate;
+      let totalImported = 0;
+      const batchSize = 100; // Insert in batches for better performance
+
+      while (currentStart < end) {
+        // Calculate the end timestamp for this batch
+        const batchEnd = new Date(
+          Math.min(
+            currentStart.getTime() + maxCandlesPerRequest * intervalMinutes * 60 * 1000,
+            end.getTime(),
+          ),
+        );
+
+        try {
+          // Fetch OHLC data from Kraken
+          const response = await axios.get(`${this.krakenRestUrl}/OHLC`, {
+            params: {
+              pair: krakenSymbol,
+              interval: intervalMinutes,
+              since: Math.floor(currentStart.getTime() / 1000),
+            },
+            timeout: 10000,
+          });
+
+          if (response.data.error && response.data.error.length > 0) {
+            throw new Error(`Kraken API error: ${response.data.error.join(', ')}`);
+          }
+
+          const resultKey = Object.keys(response.data.result).find(k => k !== 'last');
+          if (!resultKey || !response.data.result[resultKey]) {
+            this.logger.warn(`No data returned for ${symbol} ${timeframe}`);
+            break;
+          }
+
+          const candles = response.data.result[resultKey];
+          
+          if (candles.length === 0) {
+            this.logger.log(`No more candles available for ${symbol}`);
+            break;
+          }
+
+          // Prepare entities for bulk insert
+          const entities: OHLCVEntity[] = [];
+          
+          for (const candle of candles) {
+            const timestamp = new Date(candle[0] * 1000);
+            
+            // Skip if timestamp is beyond our end date
+            if (timestamp > end) continue;
+
+            entities.push(
+              this.ohlcvRepository.create({
+                symbol,
+                timeframe,
+                timestamp,
+                open: candle[1].toString(),
+                high: candle[2].toString(),
+                low: candle[3].toString(),
+                close: candle[4].toString(),
+                volume: candle[6].toString(),
+                trades: parseInt(candle[7], 10),
+              }),
+            );
+          }
+
+          // Bulk insert with conflict handling (upsert)
+          if (entities.length > 0) {
+            for (let i = 0; i < entities.length; i += batchSize) {
+              const batch = entities.slice(i, i + batchSize);
+              await this.ohlcvRepository
+                .createQueryBuilder()
+                .insert()
+                .into(OHLCVEntity)
+                .values(batch)
+                .orIgnore() // Skip duplicates
+                .execute();
+            }
+            
+            totalImported += entities.length;
+            this.logger.log(`Imported ${entities.length} candles for ${symbol} (total: ${totalImported})`);
+          }
+
+          // Update currentStart to the last candle timestamp
+          const lastCandle = candles[candles.length - 1];
+          currentStart = new Date((lastCandle[0] + intervalMinutes * 60) * 1000);
+
+          // Rate limiting - wait 1 second between requests
+          await new Promise(resolve => setTimeout(resolve, this.krakenRateLimit));
+
+        } catch (error) {
+          const err = error as Error;
+          this.logger.error(`Error fetching batch: ${err.message}`);
+          
+          // If we hit rate limit, wait longer
+          if (err.message.includes('rate limit')) {
+            this.logger.warn('Rate limit hit, waiting 10 seconds...');
+            await new Promise(resolve => setTimeout(resolve, 10000));
+          } else {
+            throw error;
+          }
+        }
+      }
+
+      // Clear cache after backfill
+      this.clearHistoricalCache(symbol, timeframe);
+
+      const message = `Successfully imported ${totalImported} candles for ${symbol} ${timeframe}`;
+      this.logger.log(message);
+      
+      return {
+        success: true,
+        candlesImported: totalImported,
+        message,
+      };
+
+    } catch (error) {
+      const err = error as Error;
+      const message = `Backfill failed: ${err.message}`;
+      this.logger.error(message, err.stack);
+      
+      return {
+        success: false,
+        candlesImported: 0,
+        message,
+      };
+    }
+  }
+
+  /**
+   * Convert timeframe to minutes for Kraken API
+   */
+  private timeframeToMinutes(timeframe: Timeframe): number {
+    const map: Record<Timeframe, number> = {
+      [Timeframe.ONE_MINUTE]: 1,
+      [Timeframe.FIVE_MINUTES]: 5,
+      [Timeframe.FIFTEEN_MINUTES]: 15,
+      [Timeframe.ONE_HOUR]: 60,
+      [Timeframe.FOUR_HOURS]: 240,
+      [Timeframe.ONE_DAY]: 1440,
+    };
+    return map[timeframe] || 60;
+  }
+
+  /**
+   * Clear historical data cache for a specific symbol and timeframe
+   */
+  private clearHistoricalCache(symbol?: string, timeframe?: Timeframe): void {
+    if (!symbol && !timeframe) {
+      // Clear all cache
+      this.ohlcvCache.clear();
+      this.logger.debug('Cleared all OHLCV cache');
+      return;
+    }
+
+    // Clear specific cache entries
+    const keysToDelete: string[] = [];
+    for (const key of this.ohlcvCache.keys()) {
+      const [keySymbol, keyTimeframe] = key.split(':');
+      if (
+        (!symbol || keySymbol === symbol) &&
+        (!timeframe || keyTimeframe === timeframe)
+      ) {
+        keysToDelete.push(key);
+      }
+    }
+
+    keysToDelete.forEach(key => this.ohlcvCache.delete(key));
+    this.logger.debug(`Cleared ${keysToDelete.length} OHLCV cache entries`);
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats(): {
+    ohlcvCacheSize: number;
+    tickerCacheSize: number;
+    orderBookCacheSize: number;
+  } {
+    return {
+      ohlcvCacheSize: this.ohlcvCache.size,
+      tickerCacheSize: this.tickerCache.size,
+      orderBookCacheSize: this.orderBookCache.size,
+    };
   }
 
   /**

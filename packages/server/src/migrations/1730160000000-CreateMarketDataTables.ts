@@ -24,12 +24,18 @@ export class CreateMarketDataTables1730160000000 implements MigrationInterface {
     // Create indexes
     await queryRunner.query(`
       CREATE INDEX "idx_ohlcv_symbol_timeframe_timestamp" 
-      ON "ohlcv" ("symbol", "timeframe", "timestamp")
+      ON "ohlcv" ("symbol", "timeframe", "timestamp" DESC)
     `);
 
     await queryRunner.query(`
       CREATE INDEX "idx_ohlcv_timestamp" 
-      ON "ohlcv" ("timestamp")
+      ON "ohlcv" ("timestamp" DESC)
+    `);
+
+    // Add unique constraint to prevent duplicate candles
+    await queryRunner.query(`
+      CREATE UNIQUE INDEX "idx_ohlcv_unique_candle"
+      ON "ohlcv" ("symbol", "timeframe", "timestamp")
     `);
 
     // Convert to TimescaleDB hypertable (if TimescaleDB extension is installed)
@@ -79,6 +85,7 @@ export class CreateMarketDataTables1730160000000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop indexes
+    await queryRunner.query(`DROP INDEX IF EXISTS "idx_ohlcv_unique_candle"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_ohlcv_timestamp"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_ohlcv_symbol_timeframe_timestamp"`);
 
