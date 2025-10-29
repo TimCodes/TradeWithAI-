@@ -5,8 +5,8 @@ import { BullModule } from '@nestjs/bull';
 import { AuthModule } from './modules/auth/auth.module';
 import { TradingModule } from './modules/trading/trading.module';
 import { LLMModule } from './modules/llm/llm.module';
+import { MarketDataModule } from './modules/market-data/market-data.module';
 import { validate } from './config/env.validation';
-// import { MarketDataModule } from './modules/market-data/market-data.module';
 // import { WebsocketModule } from './modules/websocket/websocket.module';
 
 @Module({
@@ -42,7 +42,7 @@ import { validate } from './config/env.validation';
     AuthModule,
     TradingModule,
     LLMModule,
-    // MarketDataModule,
+    MarketDataModule,
     // WebsocketModule,
   ],
   controllers: [],
