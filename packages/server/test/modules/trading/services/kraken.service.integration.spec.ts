@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { KrakenService } from './kraken.service';
+import { KrakenService } from '../../../../src/modules/trading/services/kraken.service';
 
 /**
  * Integration tests for Kraken API Service

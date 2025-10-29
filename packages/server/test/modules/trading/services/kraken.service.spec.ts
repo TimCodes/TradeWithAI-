@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { KrakenService } from './kraken.service';
+import { KrakenService } from '../../../../src/modules/trading/services/kraken.service';
 import axios from 'axios';
 
 // Mock axios
