@@ -164,16 +164,24 @@ TradeWithAI is an AI-powered autonomous trading platform currently in active dev
 **2.2 Historical Data Management**
 - **Story Points**: 5
 - **Description**: As a trader, I need access to historical price data for analysis
+- **Status**: ✅ **COMPLETE** (October 28, 2025)
 - **Acceptance Criteria**:
-  - [ ] Implement getHistoricalData() method
-  - [ ] Support multiple timeframes (1m, 5m, 15m, 1h, 4h, 1d)
-  - [ ] Add data backfill mechanism
-  - [ ] Create API endpoints for OHLCV queries
-  - [ ] Optimize TimescaleDB queries with proper indexes
-  - [ ] Add caching for frequently accessed data
+  - [x] Implement getHistoricalData() method with caching
+  - [x] Support multiple timeframes (1m, 5m, 15m, 1h, 4h, 1d)
+  - [x] Add data backfill mechanism to fetch from Kraken REST API
+  - [x] Create API endpoints for OHLCV queries (GET /historical/:symbol, POST /backfill)
+  - [x] Optimize TimescaleDB queries with proper indexes
+  - [x] Add caching for frequently accessed data (60s TTL, in-memory)
 - **Dependencies**: 2.1
-- **Files to Create**:
-  - `packages/server/src/modules/market-data/dto/historical-data.dto.ts`
+- **Files Created**:
+  - `packages/server/src/modules/market-data/STORY_2.2_COMPLETE.md` ✅
+  - `packages/server/test/modules/market-data/services/market-data.service.spec.ts` ✅
+  - `packages/server/test/modules/market-data/controllers/market-data.controller.integration.spec.ts` ✅
+- **Files Modified**:
+  - `packages/server/src/modules/market-data/services/market-data.service.ts` ✅
+  - `packages/server/src/modules/market-data/controllers/market-data.controller.ts` ✅
+  - `packages/server/src/modules/market-data/dto/market-data.dto.ts` ✅
+  - `packages/server/src/migrations/1730160000000-CreateMarketDataTables.ts` ✅
 
 **2.3 Market Data Module Integration**
 - **Story Points**: 3
@@ -188,7 +196,8 @@ TradeWithAI is an AI-powered autonomous trading platform currently in active dev
 - **Files to Create**:
   - `packages/server/src/modules/market-data/market-data.module.ts`
 
-**Total Sprint Points**: 16 (1.5 weeks for 1 developer)
+**Total Sprint Points**: 16 (1.5 weeks for 1 developer)  
+**Epic 2 Status**: 🟢 **50% COMPLETE** - Story 2.1 and 2.2 finished!
 
 ---
 

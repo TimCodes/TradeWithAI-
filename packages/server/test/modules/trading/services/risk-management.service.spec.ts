@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RiskManagementService } from './risk-management.service';
-import { RiskSettings } from '../entities/risk-settings.entity';
-import { Position, PositionStatus } from '../entities/position.entity';
-import { Trade } from '../entities/trade.entity';
-import { RiskCheckStatus } from '../dto/risk-check.dto';
-import { OrderSide } from '../entities/order.entity';
+import { RiskManagementService } from '../../../../src/modules/trading/services/risk-management.service';
+import { RiskSettings } from '../../../../src/modules/trading/entities/risk-settings.entity';
+import { Position, PositionStatus } from '../../../../src/modules/trading/entities/position.entity';
+import { Trade } from '../../../../src/modules/trading/entities/trade.entity';
+import { RiskCheckStatus } from '../../../../src/modules/trading/dto/risk-check.dto';
+import { OrderSide } from '../../../../src/modules/trading/entities/order.entity';
 
 describe('RiskManagementService', () => {
   let service: RiskManagementService;

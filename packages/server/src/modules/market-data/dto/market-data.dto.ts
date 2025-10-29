@@ -131,3 +131,39 @@ export class OHLCVDto {
   @ApiProperty({ example: 250 })
   trades: number;
 }
+
+export class BackfillRequestDto {
+  @ApiProperty({ example: 'BTC/USD' })
+  @IsString()
+  symbol: string;
+
+  @ApiProperty({ enum: Timeframe, example: Timeframe.ONE_HOUR })
+  @IsEnum(Timeframe)
+  timeframe: Timeframe;
+
+  @ApiProperty({ example: '2025-10-01T00:00:00Z', description: 'Start date for backfill' })
+  @IsDateString()
+  startDate: string;
+
+  @ApiProperty({ example: '2025-10-28T00:00:00Z', required: false, description: 'End date for backfill (defaults to now)' })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+}
+
+export class BackfillStatusDto {
+  @ApiProperty({ example: true })
+  success: boolean;
+
+  @ApiProperty({ example: 'Backfill completed' })
+  message: string;
+
+  @ApiProperty({ example: 1000 })
+  candlesImported: number;
+
+  @ApiProperty({ example: '2025-10-01T00:00:00Z' })
+  startDate: Date;
+
+  @ApiProperty({ example: '2025-10-28T00:00:00Z' })
+  endDate: Date;
+}
