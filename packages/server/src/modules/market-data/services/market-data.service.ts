@@ -6,7 +6,6 @@ import { OHLCVEntity } from '../entities/ohlcv.entity';
 import {
   TickerDataDto,
   OrderBookDto,
-  OrderBookLevel,
   OHLCVDto,
   Timeframe,
 } from '../dto/market-data.dto';
