@@ -7,6 +7,7 @@ import { Order, OrderStatus, OrderType, OrderSide } from '../entities/order.enti
 import { Position, PositionStatus } from '../entities/position.entity';
 import { Trade, TradeType } from '../entities/trade.entity';
 import { KrakenService } from './kraken.service';
+import { TradingEventsService } from './trading-events.service';
 
 export interface OrderExecutionJob {
   orderId: string;
@@ -28,6 +29,7 @@ export class OrderExecutorService {
     @InjectQueue('order-execution')
     private readonly orderQueue: Queue,
     private readonly krakenService: KrakenService,
+    private readonly tradingEventsService: TradingEventsService,
   ) {}
 
   /**
@@ -104,6 +106,12 @@ export class OrderExecutorService {
         order.status = OrderStatus.REJECTED;
         order.rejectReason = errorMessage;
         await this.orderRepository.save(order);
+        
+        // Emit order rejected event
+        this.tradingEventsService.emitOrderRejected({
+          userId: order.userId,
+          order,
+        });
       }
 
       throw error;
@@ -213,6 +221,18 @@ export class OrderExecutorService {
     order.filledAt = new Date();
     await this.orderRepository.save(order);
 
+    // Emit order filled event
+    this.tradingEventsService.emitOrderFilled({
+      userId: order.userId,
+      order,
+    });
+
+    // Emit trade executed event
+    this.tradingEventsService.emitTradeExecuted({
+      userId: order.userId,
+      trade,
+    });
+
     // Create or update position
     await this.updatePosition(order, trade);
 
@@ -252,6 +272,12 @@ export class OrderExecutorService {
       trade.positionId = position.id;
       trade.type = TradeType.ENTRY;
       await this.tradeRepository.save(trade);
+
+      // Emit position opened event
+      this.tradingEventsService.emitPositionOpened({
+        userId: order.userId,
+        position,
+      });
 
       this.logger.log(`Created new position ${position.id} for order ${order.id}`);
     } else {
@@ -295,6 +321,19 @@ export class OrderExecutorService {
     await this.positionRepository.save(position);
     await this.tradeRepository.save(trade);
 
+    // Emit position event based on whether it was closed or reduced
+    if (position.status === PositionStatus.CLOSED) {
+      this.tradingEventsService.emitPositionClosed({
+        userId: position.userId,
+        position,
+      });
+    } else {
+      this.tradingEventsService.emitPositionUpdated({
+        userId: position.userId,
+        position,
+      });
+    }
+
     this.logger.log(`Updated position ${position.id} with trade ${trade.id}`);
   }
 
@@ -325,15 +364,30 @@ export class OrderExecutorService {
     await this.positionRepository.save(position);
     await this.tradeRepository.save(trade);
 
+    // Emit position updated event
+    this.tradingEventsService.emitPositionUpdated({
+      userId: position.userId,
+      position,
+    });
+
     this.logger.log(`Added to position ${position.id} with trade ${trade.id}`);
   }
 
   /**
-   * Update order status
+   * Update order status and emit event
    */
   private async updateOrderStatus(order: Order, status: OrderStatus): Promise<void> {
+    const previousStatus = order.status;
     order.status = status;
     await this.orderRepository.save(order);
+
+    // Emit event based on status
+    if (status === OrderStatus.SUBMITTED) {
+      this.tradingEventsService.emitOrderSubmitted({
+        userId: order.userId,
+        order,
+      });
+    }
   }
 
   /**
@@ -383,6 +437,12 @@ export class OrderExecutorService {
     order.status = OrderStatus.CANCELLED;
     order.cancelledAt = new Date();
     await this.orderRepository.save(order);
+
+    // Emit order cancelled event
+    this.tradingEventsService.emitOrderCancelled({
+      userId: order.userId,
+      order,
+    });
 
     this.logger.log(`Order ${orderId} cancelled`);
   }

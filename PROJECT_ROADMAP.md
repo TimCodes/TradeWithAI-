@@ -1,6 +1,6 @@
 # TradeWithAI - Project Roadmap & Sprint Planning
 
-**Project Status**: 45% Complete  
+**Project Status**: 48% Complete  
 **Target MVP Date**: December 15, 2025 (6-8 weeks)  
 **Last Updated**: October 29, 2025
 
@@ -21,9 +21,11 @@ TradeWithAI is an AI-powered autonomous trading platform currently in active dev
 - ✅ Historical data management (Story 2.2)
 - ✅ Market data module integration (Story 2.3)
 - ✅ WebSocket gateway setup (Story 3.1)
+- ✅ Trading event broadcasting (Story 3.2)
 
 ### Critical Gaps Remaining:
-- ⏳ WebSocket event broadcasting for trading and market data
+- ⏳ WebSocket market data streaming
+- ⏳ WebSocket LLM response streaming
 - ❌ No functional frontend components
 - ❌ No state management
 
@@ -241,16 +243,24 @@ TradeWithAI is an AI-powered autonomous trading platform currently in active dev
 **3.2 Trading Event Broadcasting**
 - **Story Points**: 5
 - **Description**: As a trader, I need instant notifications of order fills and position updates
+- **Status**: ✅ **COMPLETE** (October 29, 2025)
 - **Acceptance Criteria**:
-  - [ ] Broadcast order status updates (pending → filled)
-  - [ ] Broadcast position P&L updates
-  - [ ] Broadcast balance changes
-  - [ ] Emit trade execution confirmations
-  - [ ] Add user-specific event channels
-  - [ ] Implement event queuing for disconnected clients
+  - [x] Broadcast order status updates (pending → filled)
+  - [x] Broadcast position P&L updates
+  - [x] Broadcast balance changes
+  - [x] Emit trade execution confirmations
+  - [x] Add user-specific event channels
+  - [x] Implement event queuing for disconnected clients
 - **Dependencies**: 3.1, Epic 1
-- **Files to Create**:
-  - `packages/server/src/modules/websocket/events/trading.events.ts`
+- **Files Created**:
+  - `packages/server/src/modules/websocket/events/trading.events.ts` ✅
+  - `packages/server/src/modules/websocket/STORY_3.2_COMPLETE.md` ✅
+- **Files Modified**:
+  - `packages/server/src/modules/websocket/websocket.module.ts` ✅
+  - `packages/server/src/modules/trading/trading.module.ts` ✅
+  - `packages/server/src/modules/trading/services/trading-events.service.ts` ✅
+  - `packages/server/src/modules/trading/services/order-executor.service.ts` ✅
+  - `packages/server/src/modules/trading/services/trading.service.ts` ✅
 
 **3.3 Market Data Streaming**
 - **Story Points**: 3
