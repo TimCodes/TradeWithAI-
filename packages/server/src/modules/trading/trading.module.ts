@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { KrakenService } from './services/kraken.service';
 import { TradingService } from './services/trading.service';
 import { OrderExecutorService } from './services/order-executor.service';
@@ -39,6 +40,7 @@ import { RiskSettings } from './entities/risk-settings.entity';
 @Module({
   imports: [
     ConfigModule,
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forFeature([Order, Position, Trade, RiskSettings]),
     BullModule.registerQueue({
       name: 'order-execution',

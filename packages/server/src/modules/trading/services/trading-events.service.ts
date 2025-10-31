@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Order } from '../entities/order.entity';
 import { Position } from '../entities/position.entity';
 import { Trade } from '../entities/trade.entity';
@@ -40,81 +41,67 @@ export interface BalanceEventPayload {
 /**
  * WebSocket Events Service for Trading
  * 
- * This service defines the event structure for real-time trading updates.
- * When a WebSocketGateway is implemented (Epic 3), it will subscribe to these events
- * and broadcast them to connected clients.
+ * This service emits events when trading operations occur, which are then
+ * broadcast to connected WebSocket clients via the TradingEventsHandler.
  * 
  * Usage:
  * - OrderExecutorService emits events when order status changes
  * - TradingService emits events when positions are updated
  * - WebSocketGateway listens to these events and broadcasts to clients
  * 
- * Example WebSocket message format:
+ * Example WebSocket message format received by clients:
  * {
- *   event: 'trading.order.filled',
+ *   event: 'order:filled',
  *   data: {
  *     userId: 'user-123',
  *     order: { ... }
- *   }
+ *   },
+ *   timestamp: '2025-10-29T12:00:00.000Z'
  * }
  */
 @Injectable()
 export class TradingEventsService {
-  // This is a placeholder service that defines the event structure
-  // When WebSocketGateway is implemented, it will use @OnEvent decorators
-  // to listen to these events and broadcast them via Socket.IO
+  constructor(private readonly eventEmitter: EventEmitter2) {}
 
-  /**
-   * Example of how WebSocketGateway would handle these events:
-   * 
-   * @OnEvent(TRADING_EVENTS.ORDER_FILLED)
-   * async handleOrderFilled(payload: OrderEventPayload) {
-   *   this.server
-   *     .to(`user:${payload.userId}`)
-   *     .emit('order:filled', payload.order);
-   * }
-   */
-
-  // Event emitters (to be called from TradingService and OrderExecutorService)
+  // Event emitters (called from TradingService and OrderExecutorService)
   
   emitOrderCreated(payload: OrderEventPayload): void {
-    // EventEmitter will be injected when @nestjs/event-emitter is set up
-    // this.eventEmitter.emit(TRADING_EVENTS.ORDER_CREATED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.ORDER_CREATED, payload);
   }
 
   emitOrderSubmitted(payload: OrderEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.ORDER_SUBMITTED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.ORDER_SUBMITTED, payload);
   }
 
   emitOrderFilled(payload: OrderEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.ORDER_FILLED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.ORDER_FILLED, payload);
   }
 
   emitOrderCancelled(payload: OrderEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.ORDER_CANCELLED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.ORDER_CANCELLED, payload);
   }
 
   emitOrderRejected(payload: OrderEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.ORDER_REJECTED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.ORDER_REJECTED, payload);
   }
 
   emitPositionOpened(payload: PositionEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.POSITION_OPENED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.POSITION_OPENED, payload);
   }
 
   emitPositionUpdated(payload: PositionEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.POSITION_UPDATED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.POSITION_UPDATED, payload);
   }
 
   emitPositionClosed(payload: PositionEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.POSITION_CLOSED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.POSITION_CLOSED, payload);
   }
 
   emitTradeExecuted(payload: TradeEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.TRADE_EXECUTED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.TRADE_EXECUTED, payload);
   }
 
   emitBalanceUpdated(payload: BalanceEventPayload): void {
-    // this.eventEmitter.emit(TRADING_EVENTS.BALANCE_UPDATED, payload);
+    this.eventEmitter.emit(TRADING_EVENTS.BALANCE_UPDATED, payload);
   }
 }

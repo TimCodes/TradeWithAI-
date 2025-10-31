@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { WebSocketGatewayService } from './websocket.gateway';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 import { WebSocketHealthController } from './controllers/health.controller';
+import { TradingEventsHandler } from './events/trading.events';
 
 /**
  * WebSocket Module
@@ -74,6 +76,16 @@ import { WebSocketHealthController } from './controllers/health.controller';
  */
 @Module({
   imports: [
+    EventEmitterModule.forRoot({
+      // Use this instance for WebSocket events
+      wildcard: false,
+      delimiter: '.',
+      newListener: false,
+      removeListener: false,
+      maxListeners: 20,
+      verboseMemoryLeak: false,
+      ignoreErrors: false,
+    }),
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET') || 'your-super-secret-jwt-key-change-in-production',
@@ -86,6 +98,7 @@ import { WebSocketHealthController } from './controllers/health.controller';
   providers: [
     WebSocketGatewayService,
     WsJwtGuard,
+    TradingEventsHandler,
   ],
   exports: [WebSocketGatewayService],
 })

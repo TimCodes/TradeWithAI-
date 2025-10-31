@@ -7,6 +7,7 @@ import { Trade } from '../entities/trade.entity';
 import { OrderExecutorService } from './order-executor.service';
 import { KrakenService } from './kraken.service';
 import { RiskManagementService } from './risk-management.service';
+import { TradingEventsService } from './trading-events.service';
 import { RiskCheckStatus } from '../dto/risk-check.dto';
 
 export interface CreateOrderDto {
@@ -48,6 +49,7 @@ export class TradingService {
     private readonly orderExecutor: OrderExecutorService,
     private readonly krakenService: KrakenService,
     private readonly riskManagement: RiskManagementService,
+    private readonly tradingEventsService: TradingEventsService,
   ) {}
 
   /**
@@ -151,6 +153,12 @@ export class TradingService {
       };
       await this.orderRepository.save(savedOrder);
     }
+
+    // Emit order created event
+    this.tradingEventsService.emitOrderCreated({
+      userId,
+      order: savedOrder,
+    });
 
     // Queue for execution
     await this.orderExecutor.queueOrder(savedOrder.id, userId);
