@@ -14,6 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 import { WsExceptionFilter } from './ws-exception.filter';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 import { MarketDataEventsHandler } from './events/market-data.events';
+import { LLMEventsHandler } from './events/llm.events';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -77,6 +78,7 @@ export class WebSocketGatewayService
   constructor(
     private readonly jwtService: JwtService,
     private readonly marketDataEventsHandler: MarketDataEventsHandler,
+    private readonly llmEventsHandler: LLMEventsHandler,
   ) {}
 
   /**
@@ -133,6 +135,9 @@ export class WebSocketGatewayService
   onModuleInit() {
     this.logger.log('WebSocket module initialized - Starting market data streaming');
     this.marketDataEventsHandler.startStreaming();
+    
+    // Set gateway reference for LLM events handler
+    this.llmEventsHandler.setWebSocketGateway(this);
   }
 
   /**
@@ -142,6 +147,7 @@ export class WebSocketGatewayService
   onModuleDestroy() {
     this.logger.log('WebSocket module shutting down - Stopping market data streaming');
     this.marketDataEventsHandler.stopStreaming();
+    this.llmEventsHandler.cancelAllStreams();
     this.stopHeartbeat();
   }
 
@@ -358,6 +364,77 @@ export class WebSocketGatewayService
   }
 
   /**
+   * Handle LLM chat stream request
+   */
+  @SubscribeMessage('llm:chat:stream')
+  @UseGuards(WsJwtGuard)
+  async handleLLMChatStream(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: {
+      sessionId: string;
+      provider: string;
+      messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
+    },
+  ) {
+    if (!this.checkRateLimit(client.id)) {
+      client.emit('error', { message: 'Rate limit exceeded' });
+      return;
+    }
+
+    const { sessionId, provider, messages } = payload;
+
+    if (!sessionId || !provider || !messages) {
+      client.emit('error', { 
+        message: 'sessionId, provider, and messages are required' 
+      });
+      return;
+    }
+
+    // Start streaming (non-blocking)
+    this.llmEventsHandler
+      .streamChatResponse(client.id, sessionId, provider, messages)
+      .catch((error) => {
+        this.logger.error(`LLM stream failed: ${error.message}`);
+      });
+
+    // Acknowledge request
+    client.emit('llm:chat:stream:acknowledged', {
+      sessionId,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Handle LLM stream cancellation
+   */
+  @SubscribeMessage('llm:stream:cancel')
+  @UseGuards(WsJwtGuard)
+  handleLLMStreamCancel(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: { sessionId: string },
+  ) {
+    if (!this.checkRateLimit(client.id)) {
+      client.emit('error', { message: 'Rate limit exceeded' });
+      return;
+    }
+
+    const { sessionId } = payload;
+
+    if (!sessionId) {
+      client.emit('error', { message: 'sessionId is required' });
+      return;
+    }
+
+    const cancelled = this.llmEventsHandler.cancelStream(sessionId);
+    
+    client.emit('llm:stream:cancel:acknowledged', {
+      sessionId,
+      cancelled,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
    * Get list of active subscriptions for a client
    */
   @SubscribeMessage('get-subscriptions')
@@ -392,6 +469,21 @@ export class WebSocketGatewayService
       ...data,
       timestamp: new Date().toISOString(),
     });
+  }
+
+  /**
+   * Send message to specific client by socket ID
+   */
+  sendToClient(clientId: string, event: string, data: any) {
+    const client = this.connectedClients.get(clientId);
+    if (client) {
+      client.emit(event, {
+        ...data,
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      this.logger.warn(`Attempted to send to non-existent client: ${clientId}`);
+    }
   }
 
   /**
@@ -471,6 +563,7 @@ export class WebSocketGatewayService
         subscriptions: Array.from(this.clientSubscriptions.get(client.id) || []),
       })),
       marketDataStreaming: this.marketDataEventsHandler.getStats(),
+      activeLLMStreams: this.llmEventsHandler.getActiveStreamCount(),
     };
   }
 }

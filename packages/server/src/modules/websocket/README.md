@@ -16,6 +16,9 @@ The WebSocket module provides production-ready real-time communication capabilit
 - **Broadcasting Utilities**: Send to specific users or rooms
 - **Connection Statistics**: Track connected clients and subscriptions
 - **Auto-Reconnection Support**: Client-side reconnection handling
+- **LLM Response Streaming**: Real-time token-by-token LLM responses
+- **Trading Event Broadcasting**: Instant order fills, position updates
+- **Market Data Streaming**: Live price updates and order book changes
 
 ## 🏗️ Architecture
 
@@ -25,6 +28,13 @@ WebSocketModule
 ├── websocket.module.ts        # Module configuration
 ├── guards/
 │   └── ws-jwt.guard.ts       # JWT authentication guard
+├── events/
+│   ├── trading.events.ts     # Trading event handlers
+│   ├── market-data.events.ts # Market data streaming
+│   └── llm.events.ts         # LLM streaming handlers
+├── controllers/
+│   ├── health.controller.ts  # Health check endpoint
+│   └── market-data-stream.controller.ts
 └── ws-exception.filter.ts    # Error handling filter
 ```
 
@@ -127,9 +137,62 @@ socket.on('orderbook:update', (data) => {
 });
 
 // LLM events
-socket.on('llm:stream', (data) => {
-  console.log('LLM chunk:', data);
+socket.on('llm:stream:start', (data) => {
+  console.log('LLM stream started:', data);
 });
+
+socket.on('llm:stream:token', (data) => {
+  console.log('LLM token:', data.token);
+});
+
+socket.on('llm:stream:done', (data) => {
+  console.log('LLM stream complete:', data);
+});
+```
+
+### LLM Streaming
+
+```typescript
+// Start streaming LLM response
+const sessionId = `session-${Date.now()}`;
+
+socket.emit('llm:chat:stream', {
+  sessionId,
+  provider: 'openai', // or 'claude', 'gemini', 'deepseek'
+  messages: [
+    { role: 'user', content: 'What is Bitcoin?' }
+  ]
+});
+
+// Listen for streaming events
+socket.on('llm:stream:start', (data) => {
+  console.log('Stream started with provider:', data.provider);
+});
+
+socket.on('llm:stream:token', (data) => {
+  // Append each token as it arrives
+  appendToken(data.token);
+});
+
+socket.on('llm:stream:done', (data) => {
+  console.log('Stream complete!');
+  console.log('Full response:', data.fullResponse);
+  console.log('Token count:', data.tokenCount);
+});
+
+socket.on('llm:stream:error', (data) => {
+  console.error('Stream error:', data.error);
+});
+
+// Cancel stream if needed
+socket.emit('llm:stream:cancel', { sessionId });
+
+socket.on('llm:stream:cancelled', (data) => {
+  console.log('Stream cancelled:', data.sessionId);
+});
+```
+
+For detailed LLM streaming integration guide, see [LLM_STREAMING_GUIDE.md](./LLM_STREAMING_GUIDE.md).
 ```
 
 ### Unsubscribe from Channels
@@ -230,6 +293,8 @@ const socket = io('http://localhost:3000');
 | `unsubscribe` | `{ channel, symbols? }` | Unsubscribe from channel |
 | `ping` | none | Health check |
 | `get-subscriptions` | none | Get active subscriptions |
+| `llm:chat:stream` | `{ sessionId, provider, messages }` | Start LLM streaming |
+| `llm:stream:cancel` | `{ sessionId }` | Cancel LLM stream |
 
 ### Server → Client
 
@@ -243,6 +308,11 @@ const socket = io('http://localhost:3000');
 | `error` | `{ message, code, timestamp }` | Error message |
 | `connection-count` | `{ count, timestamp }` | Connected clients count |
 | `subscriptions` | `{ subscriptions, count, timestamp }` | List of subscriptions |
+| `llm:stream:start` | `{ sessionId, provider, timestamp }` | LLM stream started |
+| `llm:stream:token` | `{ sessionId, token, timestamp }` | LLM token received |
+| `llm:stream:done` | `{ sessionId, fullResponse, tokenCount, timestamp }` | LLM stream complete |
+| `llm:stream:error` | `{ sessionId, error, timestamp }` | LLM stream error |
+| `llm:stream:cancelled` | `{ sessionId, timestamp }` | LLM stream cancelled |
 
 ## 📊 Rate Limiting
 
