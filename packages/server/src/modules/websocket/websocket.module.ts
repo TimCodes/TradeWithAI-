@@ -8,7 +8,9 @@ import { WebSocketHealthController } from './controllers/health.controller';
 import { MarketDataStreamController } from './controllers/market-data-stream.controller';
 import { TradingEventsHandler } from './events/trading.events';
 import { MarketDataEventsHandler } from './events/market-data.events';
+import { LLMEventsHandler } from './events/llm.events';
 import { MarketDataModule } from '../market-data/market-data.module';
+import { LLMModule } from '../llm/llm.module';
 
 /**
  * WebSocket Module
@@ -80,6 +82,7 @@ import { MarketDataModule } from '../market-data/market-data.module';
 @Module({
   imports: [
     MarketDataModule,
+    LLMModule,
     EventEmitterModule.forRoot({
       // Use this instance for WebSocket events
       wildcard: false,
@@ -104,6 +107,7 @@ import { MarketDataModule } from '../market-data/market-data.module';
     WsJwtGuard,
     TradingEventsHandler,
     MarketDataEventsHandler,
+    LLMEventsHandler,
   ],
   exports: [WebSocketGatewayService],
 })
