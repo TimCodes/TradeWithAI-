@@ -5,7 +5,10 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { WebSocketGatewayService } from './websocket.gateway';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
 import { WebSocketHealthController } from './controllers/health.controller';
+import { MarketDataStreamController } from './controllers/market-data-stream.controller';
 import { TradingEventsHandler } from './events/trading.events';
+import { MarketDataEventsHandler } from './events/market-data.events';
+import { MarketDataModule } from '../market-data/market-data.module';
 
 /**
  * WebSocket Module
@@ -76,6 +79,7 @@ import { TradingEventsHandler } from './events/trading.events';
  */
 @Module({
   imports: [
+    MarketDataModule,
     EventEmitterModule.forRoot({
       // Use this instance for WebSocket events
       wildcard: false,
@@ -94,11 +98,12 @@ import { TradingEventsHandler } from './events/trading.events';
       inject: [ConfigService],
     }),
   ],
-  controllers: [WebSocketHealthController],
+  controllers: [WebSocketHealthController, MarketDataStreamController],
   providers: [
     WebSocketGatewayService,
     WsJwtGuard,
     TradingEventsHandler,
+    MarketDataEventsHandler,
   ],
   exports: [WebSocketGatewayService],
 })

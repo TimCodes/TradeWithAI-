@@ -9,10 +9,11 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger, UseFilters, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { WsExceptionFilter } from './ws-exception.filter';
 import { WsJwtGuard } from './guards/ws-jwt.guard';
+import { MarketDataEventsHandler } from './events/market-data.events';
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -52,7 +53,7 @@ interface SubscribePayload {
 })
 @UseFilters(WsExceptionFilter)
 export class WebSocketGatewayService
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnModuleInit, OnModuleDestroy
 {
   @WebSocketServer()
   server: Server;
@@ -73,7 +74,10 @@ export class WebSocketGatewayService
   private heartbeatInterval: NodeJS.Timeout;
   private readonly heartbeatIntervalMs = 30000;
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly marketDataEventsHandler: MarketDataEventsHandler,
+  ) {}
 
   /**
    * Initialize gateway after server starts
@@ -120,6 +124,25 @@ export class WebSocketGatewayService
         next(new Error('Authentication failed'));
       }
     });
+  }
+
+  /**
+   * Module initialization
+   * Start market data streaming
+   */
+  onModuleInit() {
+    this.logger.log('WebSocket module initialized - Starting market data streaming');
+    this.marketDataEventsHandler.startStreaming();
+  }
+
+  /**
+   * Module cleanup
+   * Stop market data streaming and heartbeat
+   */
+  onModuleDestroy() {
+    this.logger.log('WebSocket module shutting down - Stopping market data streaming');
+    this.marketDataEventsHandler.stopStreaming();
+    this.stopHeartbeat();
   }
 
   /**
@@ -204,6 +227,33 @@ export class WebSocketGatewayService
       return;
     }
 
+    // Handle market data subscriptions with dynamic symbol subscription
+    if (channel === 'market-data' && symbols && symbols.length > 0) {
+      this.marketDataEventsHandler.handleSymbolSubscription(symbols);
+      
+      // Join room for each symbol
+      symbols.forEach((symbol) => {
+        const symbolRoom = `market-data:${symbol}`;
+        client.join(symbolRoom);
+        
+        // Track subscription
+        const clientSubs = this.clientSubscriptions.get(client.id);
+        if (clientSubs) {
+          clientSubs.add(symbolRoom);
+        }
+      });
+      
+      this.logger.debug(`Client ${client.id} subscribed to market-data for symbols: ${symbols.join(', ')}`);
+      
+      client.emit('subscribed', {
+        channel,
+        symbols,
+        rooms: symbols.map((s) => `market-data:${s}`),
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
     // Join channel room
     const roomName = symbols && symbols.length > 0
       ? `${channel}:${symbols.join(',')}`
@@ -245,6 +295,34 @@ export class WebSocketGatewayService
 
     if (!channel) {
       client.emit('error', { message: 'Channel name required' });
+      return;
+    }
+
+    // Handle market data unsubscriptions
+    if (channel === 'market-data' && symbols && symbols.length > 0) {
+      // Leave room for each symbol
+      symbols.forEach((symbol) => {
+        const symbolRoom = `market-data:${symbol}`;
+        client.leave(symbolRoom);
+        
+        // Update subscriptions
+        const clientSubs = this.clientSubscriptions.get(client.id);
+        if (clientSubs) {
+          clientSubs.delete(symbolRoom);
+        }
+      });
+      
+      // Check if we should unsubscribe from Kraken
+      this.marketDataEventsHandler.handleSymbolUnsubscription(symbols);
+      
+      this.logger.debug(`Client ${client.id} unsubscribed from market-data for symbols: ${symbols.join(', ')}`);
+      
+      client.emit('unsubscribed', {
+        channel,
+        symbols,
+        rooms: symbols.map((s) => `market-data:${s}`),
+        timestamp: new Date().toISOString(),
+      });
       return;
     }
 
@@ -392,14 +470,7 @@ export class WebSocketGatewayService
         email: client.email,
         subscriptions: Array.from(this.clientSubscriptions.get(client.id) || []),
       })),
+      marketDataStreaming: this.marketDataEventsHandler.getStats(),
     };
-  }
-
-  /**
-   * Cleanup on module destroy
-   */
-  onModuleDestroy() {
-    this.stopHeartbeat();
-    this.logger.log('WebSocket Gateway shutting down');
   }
 }
