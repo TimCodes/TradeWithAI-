@@ -1,0 +1,377 @@
+/* OrderBook Component Styles */
+
+.orderbook-card {
+  @apply p-4 bg-card border border-border rounded-lg;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.orderbook-header {
+  @apply flex items-center justify-between mb-3 pb-3 border-b border-border;
+}
+
+.orderbook-title {
+  @apply flex items-center gap-2;
+}
+
+.orderbook-title h3 {
+  @apply text-lg font-semibold text-foreground;
+  margin: 0;
+}
+
+.orderbook-symbol {
+  @apply text-sm text-muted-foreground font-mono;
+}
+
+.orderbook-status {
+  @apply flex items-center gap-2;
+}
+
+.status-indicator {
+  @apply flex items-center gap-1.5 text-xs font-medium;
+}
+
+.status-dot {
+  @apply w-2 h-2 rounded-full;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-connected {
+  @apply text-green-500;
+}
+
+.status-connected .status-dot {
+  @apply bg-green-500;
+}
+
+.status-disconnected {
+  @apply text-red-500;
+}
+
+.status-disconnected .status-dot {
+  @apply bg-red-500;
+}
+
+.orderbook-error {
+  @apply p-3 mb-3 bg-destructive/10 border border-destructive/20 rounded-md;
+}
+
+.orderbook-error p {
+  @apply text-destructive text-sm;
+  margin: 0;
+}
+
+.orderbook-content {
+  @apply flex flex-col overflow-hidden;
+}
+
+.orderbook-column-headers {
+  @apply grid grid-cols-3 gap-2 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border;
+}
+
+.orderbook-column-headers span {
+  text-align: right;
+}
+
+.orderbook-column-headers span:first-child {
+  text-align: left;
+}
+
+.orderbook-asks-section,
+.orderbook-bids-section {
+  @apply flex flex-col overflow-y-auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.orderbook-asks-section {
+  @apply flex-col-reverse;
+}
+
+.orderbook-row {
+  @apply grid grid-cols-3 gap-2 px-3 py-1.5 text-sm font-mono relative;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.orderbook-row:hover {
+  @apply bg-accent/50;
+}
+
+.orderbook-depth {
+  @apply absolute top-0 bottom-0 right-0;
+  transition: width 0.3s ease;
+  z-index: 0;
+}
+
+.orderbook-depth-bid {
+  @apply bg-green-500/10;
+}
+
+.orderbook-depth-ask {
+  @apply bg-red-500/10;
+}
+
+.orderbook-row > span {
+  @apply relative z-10;
+  text-align: right;
+}
+
+.orderbook-row > span:first-child {
+  text-align: left;
+}
+
+.orderbook-price {
+  @apply font-semibold;
+}
+
+.orderbook-row-bid .orderbook-price {
+  @apply text-green-500;
+}
+
+.orderbook-row-ask .orderbook-price {
+  @apply text-red-500;
+}
+
+.orderbook-size {
+  @apply text-foreground;
+}
+
+.orderbook-total {
+  @apply text-muted-foreground;
+}
+
+.orderbook-spread {
+  @apply flex items-center justify-between px-3 py-2 my-1 bg-accent/30 border-y border-border;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.spread-info,
+.spread-mid-price {
+  @apply flex items-center gap-2;
+}
+
+.spread-label,
+.mid-price-label {
+  @apply text-xs font-medium text-muted-foreground;
+}
+
+.spread-value {
+  @apply text-sm font-semibold text-foreground;
+}
+
+.mid-price-value {
+  @apply text-sm font-bold text-primary;
+}
+
+.orderbook-loading {
+  @apply flex flex-col items-center justify-center py-8;
+}
+
+.loading-spinner {
+  @apply w-6 h-6 border-3 border-primary border-t-transparent rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.orderbook-loading p {
+  @apply mt-3 text-sm text-muted-foreground;
+}
+
+.orderbook-empty {
+  @apply flex items-center justify-center py-8;
+}
+
+.orderbook-empty p {
+  @apply text-sm text-muted-foreground italic;
+}
+
+.orderbook-footer {
+  @apply flex items-center justify-between mt-3 pt-3 border-t border-border;
+}
+
+.orderbook-stat {
+  @apply flex items-center gap-2;
+}
+
+.stat-label {
+  @apply text-xs font-medium text-muted-foreground;
+}
+
+.stat-value {
+  @apply text-sm font-bold;
+}
+
+.stat-bid {
+  @apply text-green-500;
+}
+
+.stat-ask {
+  @apply text-red-500;
+}
+
+/* Dark mode adjustments */
+.dark .orderbook-card {
+  @apply bg-gray-900 border-gray-800;
+}
+
+.dark .orderbook-depth-bid {
+  @apply bg-green-500/20;
+}
+
+.dark .orderbook-depth-ask {
+  @apply bg-red-500/20;
+}
+
+.dark .orderbook-spread {
+  @apply bg-gray-800/50 border-gray-700;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .orderbook-card {
+    @apply p-2;
+  }
+
+  .orderbook-header {
+    @apply flex-col items-start gap-2;
+  }
+
+  .orderbook-title {
+    @apply w-full justify-between;
+  }
+
+  .orderbook-status {
+    @apply w-full;
+  }
+
+  .orderbook-row {
+    @apply px-2 py-1 text-xs;
+  }
+
+  .orderbook-column-headers {
+    @apply px-2 text-[10px];
+  }
+
+  .orderbook-spread {
+    @apply flex-col items-start gap-1 px-2 py-1.5;
+  }
+
+  .orderbook-footer {
+    @apply flex-col items-start gap-2;
+  }
+}
+
+@media (max-width: 480px) {
+  .orderbook-title h3 {
+    @apply text-base;
+  }
+
+  .orderbook-symbol {
+    @apply text-xs;
+  }
+
+  .orderbook-row {
+    @apply text-[11px];
+  }
+
+  .stat-value {
+    @apply text-xs;
+  }
+}
+
+/* Scrollbar styling */
+.orderbook-asks-section::-webkit-scrollbar,
+.orderbook-bids-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.orderbook-asks-section::-webkit-scrollbar-track,
+.orderbook-bids-section::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.orderbook-asks-section::-webkit-scrollbar-thumb,
+.orderbook-bids-section::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+}
+
+.orderbook-asks-section::-webkit-scrollbar-thumb:hover,
+.orderbook-bids-section::-webkit-scrollbar-thumb:hover {
+  @apply bg-border/80;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.orderbook-row {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Depth bar hover effect */
+.orderbook-row:hover .orderbook-depth {
+  opacity: 0.8;
+}
+
+/* Price flash animation for updates */
+@keyframes priceFlash {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.orderbook-row.price-updated {
+  animation: priceFlash 0.5s ease-out;
+}
+
+/* Accessibility */
+.orderbook-row:focus-visible {
+  @apply outline-none ring-2 ring-primary ring-offset-2;
+}
+
+/* Loading state shimmer */
+.orderbook-loading::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

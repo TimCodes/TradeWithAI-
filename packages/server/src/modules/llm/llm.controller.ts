@@ -1,10 +1,14 @@
-import { Controller, Get, Post, Body, Param, Sse } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Sse, Req } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { LLMService, ChatMessage } from './llm.service';
+import { TradingContextService } from './services/trading-context.service';
 
 @Controller('llm')
 export class LLMController {
-  constructor(private llmService: LLMService) {}
+  constructor(
+    private llmService: LLMService,
+    private tradingContextService: TradingContextService,
+  ) {}
 
   @Get('providers')
   getProviders() {
@@ -13,12 +17,45 @@ export class LLMController {
     };
   }
 
+  @Get('trading-context')
+  async getTradingContext(@Req() req: any) {
+    // TODO: Get userId from JWT token in req.user
+    const userId = req.user?.id || 'demo-user';
+    const context = await this.tradingContextService.getTradingContext(userId);
+    return context;
+  }
+
   @Post('chat')
   async chat(
-    @Body() body: { provider: string; messages: ChatMessage[]; stream?: boolean },
+    @Body() body: { 
+      provider: string; 
+      messages: ChatMessage[]; 
+      stream?: boolean;
+      includeContext?: boolean;
+    },
+    @Req() req: any,
   ) {
-    const { provider, messages, stream = false } = body;
-    const response = await this.llmService.chat(provider, messages, stream);
+    const { provider, messages, stream = false, includeContext = false } = body;
+    
+    let processedMessages = [...messages];
+    
+    // Inject trading context if requested
+    if (includeContext) {
+      const userId = req.user?.id || 'demo-user';
+      const context = await this.tradingContextService.getTradingContext(userId);
+      const contextPrompt = this.tradingContextService.formatContextPrompt(context);
+      
+      // Add context as a system message before the user's messages
+      processedMessages = [
+        {
+          role: 'system' as const,
+          content: contextPrompt,
+        },
+        ...messages,
+      ];
+    }
+    
+    const response = await this.llmService.chat(provider, processedMessages, stream);
     return { response };
   }
 

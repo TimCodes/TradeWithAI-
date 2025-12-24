@@ -1,0 +1,454 @@
+/**
+ * PositionsList Component Styles
+ * 
+ * Styling for the positions list table with real-time P&L updates.
+ */
+
+/* =============================================================================
+   CARD CONTAINER
+   ============================================================================= */
+
+.positions-list-card {
+  @apply w-full bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden;
+}
+
+/* =============================================================================
+   HEADER SECTION
+   ============================================================================= */
+
+.positions-header {
+  @apply flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-700;
+}
+
+.positions-title {
+  @apply flex items-center gap-3;
+}
+
+.positions-title h3 {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.positions-count {
+  @apply px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-medium rounded;
+}
+
+.positions-summary {
+  @apply flex gap-4;
+}
+
+.summary-item {
+  @apply flex items-center gap-2;
+}
+
+.summary-label {
+  @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+.summary-value {
+  @apply text-sm font-semibold;
+}
+
+/* =============================================================================
+   FILTERS SECTION
+   ============================================================================= */
+
+.positions-filters {
+  @apply flex flex-col sm:flex-row gap-3 p-4 border-b border-gray-200 dark:border-gray-700;
+}
+
+.filter-input {
+  @apply flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.filter-buttons {
+  @apply flex gap-2;
+}
+
+/* =============================================================================
+   TABLE CONTAINER
+   ============================================================================= */
+
+.positions-table-container {
+  @apply overflow-y-auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 114, 128, 0.3) transparent;
+}
+
+.positions-table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.positions-table-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.positions-table-container::-webkit-scrollbar-thumb {
+  background-color: rgba(107, 114, 128, 0.3);
+  border-radius: 4px;
+}
+
+.positions-table-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.5);
+}
+
+/* =============================================================================
+   TABLE HEADER
+   ============================================================================= */
+
+.positions-table-header {
+  @apply sticky top-0 z-10 flex bg-gray-50 dark:bg-gray-800 border-b-2 border-gray-200 dark:border-gray-700;
+}
+
+.header-cell {
+  @apply px-3 py-3 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors;
+}
+
+.header-cell:hover {
+  @apply text-gray-900 dark:text-white;
+}
+
+/* Header cell widths */
+.position-symbol {
+  @apply flex-[2] min-w-[120px];
+}
+
+.position-size {
+  @apply flex-1 min-w-[80px];
+}
+
+.position-entry-price {
+  @apply flex-1 min-w-[90px];
+}
+
+.position-current-price {
+  @apply flex-1 min-w-[90px];
+}
+
+.position-pnl {
+  @apply flex-[1.5] min-w-[120px];
+}
+
+.position-realized {
+  @apply flex-1 min-w-[90px];
+}
+
+.position-levels {
+  @apply flex-[1.5] min-w-[120px];
+}
+
+.position-actions {
+  @apply flex-1 min-w-[90px];
+}
+
+/* =============================================================================
+   TABLE BODY
+   ============================================================================= */
+
+.positions-table-body {
+  @apply divide-y divide-gray-200 dark:divide-gray-700;
+}
+
+/* =============================================================================
+   POSITION ROW
+   ============================================================================= */
+
+.position-row {
+  @apply flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors;
+}
+
+.position-cell {
+  @apply px-3 py-4 text-sm;
+}
+
+/* Symbol cell with badge */
+.position-cell.position-symbol {
+  @apply flex flex-col gap-1;
+}
+
+.symbol-text {
+  @apply font-semibold text-gray-900 dark:text-white;
+}
+
+.side-badge {
+  @apply inline-block px-2 py-0.5 text-xs font-medium rounded w-fit;
+}
+
+.side-badge.side-long {
+  @apply bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300;
+}
+
+.side-badge.side-short {
+  @apply bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300;
+}
+
+/* Size cell */
+.position-cell.position-size {
+  @apply text-gray-700 dark:text-gray-300 font-mono;
+}
+
+/* Price cells */
+.position-cell.position-entry-price,
+.position-cell.position-current-price {
+  @apply text-gray-700 dark:text-gray-300 font-mono;
+}
+
+/* P&L cells */
+.position-cell.position-pnl {
+  @apply flex flex-col gap-0.5;
+}
+
+.pnl-amount {
+  @apply font-semibold;
+}
+
+.pnl-percent {
+  @apply text-xs opacity-80;
+}
+
+.position-cell.pnl-profit {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.position-cell.pnl-profit .pnl-amount,
+.position-cell.pnl-profit .pnl-percent {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.position-cell.pnl-loss {
+  @apply text-red-600 dark:text-red-400;
+}
+
+.position-cell.pnl-loss .pnl-amount,
+.position-cell.pnl-loss .pnl-percent {
+  @apply text-red-600 dark:text-red-400;
+}
+
+/* Realized P&L cell */
+.position-cell.position-realized {
+  @apply text-gray-700 dark:text-gray-300 font-mono;
+}
+
+/* SL/TP levels cell */
+.position-cell.position-levels {
+  @apply flex flex-col gap-1 text-xs;
+}
+
+.level-stop-loss {
+  @apply text-red-600 dark:text-red-400 font-mono;
+}
+
+.level-take-profit {
+  @apply text-green-600 dark:text-green-400 font-mono;
+}
+
+.level-none {
+  @apply text-gray-400 dark:text-gray-600;
+}
+
+/* Actions cell */
+.position-cell.position-actions {
+  @apply flex items-center;
+}
+
+.close-button {
+  @apply text-xs px-3 py-1;
+}
+
+/* =============================================================================
+   EMPTY STATE
+   ============================================================================= */
+
+.positions-empty {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+.positions-empty p {
+  @apply text-base font-medium text-gray-600 dark:text-gray-400 mb-2;
+}
+
+.empty-hint {
+  @apply text-sm text-gray-500 dark:text-gray-500;
+}
+
+/* =============================================================================
+   P&L ANIMATION (Pulse on change)
+   ============================================================================= */
+
+@keyframes pnl-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.position-cell.position-pnl {
+  animation: pnl-pulse 0.3s ease-out;
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .positions-header {
+    @apply flex-col items-start;
+  }
+
+  .positions-summary {
+    @apply w-full justify-between;
+  }
+
+  .header-cell,
+  .position-cell {
+    @apply px-2;
+  }
+
+  .position-symbol {
+    @apply flex-[1.5];
+  }
+
+  .position-levels {
+    @apply flex-[1.2];
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .positions-header {
+    @apply p-3;
+  }
+
+  .positions-title h3 {
+    @apply text-base;
+  }
+
+  .positions-summary {
+    @apply flex-col gap-2;
+  }
+
+  .summary-item {
+    @apply justify-between w-full;
+  }
+
+  .positions-filters {
+    @apply p-3;
+  }
+
+  /* Hide less important columns on mobile */
+  .position-realized,
+  .position-entry-price {
+    @apply hidden;
+  }
+
+  .header-cell,
+  .position-cell {
+    @apply px-2 py-2 text-xs;
+  }
+
+  .position-symbol {
+    @apply flex-[2];
+  }
+
+  .position-size,
+  .position-current-price {
+    @apply flex-1 min-w-[70px];
+  }
+
+  .position-pnl {
+    @apply flex-[1.5];
+  }
+
+  .position-levels {
+    @apply flex-1 min-w-[80px];
+  }
+
+  .position-actions {
+    @apply flex-1 min-w-[70px];
+  }
+
+  .close-button {
+    @apply px-2 py-1;
+  }
+
+  /* Stack P&L values more tightly */
+  .pnl-percent {
+    @apply text-[10px];
+  }
+
+  /* Simplify levels display */
+  .position-cell.position-levels {
+    @apply text-[10px];
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .positions-count {
+    @apply text-[10px];
+  }
+
+  .filter-buttons {
+    @apply w-full justify-between;
+  }
+
+  /* Further simplify on very small screens */
+  .position-levels {
+    @apply hidden;
+  }
+
+  .position-current-price {
+    @apply min-w-[60px];
+  }
+}
+
+/* =============================================================================
+   DARK MODE SPECIFIC
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .positions-list-card {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.26);
+  }
+
+  .filter-input:focus {
+    @apply ring-blue-400;
+  }
+}
+
+/* =============================================================================
+   ACCESSIBILITY
+   ============================================================================= */
+
+.close-button:focus-visible {
+  @apply ring-2 ring-red-500 ring-offset-2 dark:ring-offset-gray-900;
+}
+
+.filter-input:focus-visible {
+  @apply ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900;
+}
+
+/* Ensure sufficient contrast */
+@media (prefers-contrast: high) {
+  .position-cell.pnl-profit {
+    @apply text-green-700 dark:text-green-300;
+  }
+
+  .position-cell.pnl-loss {
+    @apply text-red-700 dark:text-red-300;
+  }
+
+  .side-badge.side-long {
+    @apply bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-100;
+  }
+
+  .side-badge.side-short {
+    @apply bg-red-200 dark:bg-red-800 text-red-900 dark:text-red-100;
+  }
+}

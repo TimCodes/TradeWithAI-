@@ -1,0 +1,323 @@
+/**
+ * OrderForm Component Styles
+ * 
+ * Styling for the order placement form with validation and risk metrics.
+ */
+
+/* =============================================================================
+   CARD CONTAINER
+   ============================================================================= */
+
+.order-form-card {
+  @apply w-full bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden;
+}
+
+/* =============================================================================
+   HEADER
+   ============================================================================= */
+
+.order-form-header {
+  @apply flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700;
+}
+
+.order-form-header h3 {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.balance-display {
+  @apply text-sm font-medium text-gray-600 dark:text-gray-400;
+}
+
+/* =============================================================================
+   FORM
+   ============================================================================= */
+
+.order-form {
+  @apply p-4 space-y-4;
+}
+
+.form-group {
+  @apply flex flex-col gap-2;
+}
+
+.form-group label {
+  @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+.form-select,
+.form-input {
+  @apply w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-white;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply transition-colors;
+}
+
+.form-select {
+  @apply cursor-pointer;
+}
+
+.form-input:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.current-price {
+  @apply text-xs text-gray-500 dark:text-gray-400 font-mono;
+}
+
+/* =============================================================================
+   SIDE TOGGLE
+   ============================================================================= */
+
+.side-toggle {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.side-button {
+  @apply w-full transition-all;
+}
+
+.side-button.side-buy.active {
+  @apply bg-green-600 hover:bg-green-700 text-white border-green-600;
+}
+
+.side-button.side-sell.active {
+  @apply bg-red-600 hover:bg-red-700 text-white border-red-600;
+}
+
+/* =============================================================================
+   ORDER TYPE TOGGLE
+   ============================================================================= */
+
+.order-type-toggle {
+  @apply flex gap-2;
+}
+
+/* =============================================================================
+   FORM SUMMARY
+   ============================================================================= */
+
+.form-summary {
+  @apply p-3 bg-gray-50 dark:bg-gray-800 rounded-md space-y-2;
+}
+
+.summary-row {
+  @apply flex items-center justify-between text-sm;
+}
+
+.summary-label {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+.summary-value {
+  @apply font-semibold text-gray-900 dark:text-white font-mono;
+}
+
+/* =============================================================================
+   RISK METRICS
+   ============================================================================= */
+
+.risk-metrics {
+  @apply p-3 rounded-md border-2;
+}
+
+.risk-metrics.risk-low {
+  @apply bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700;
+}
+
+.risk-metrics.risk-medium {
+  @apply bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700;
+}
+
+.risk-metrics.risk-high {
+  @apply bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700;
+}
+
+.risk-header {
+  @apply flex items-center justify-between mb-2;
+}
+
+.risk-label {
+  @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+.risk-badge {
+  @apply px-2 py-0.5 text-xs font-bold rounded;
+}
+
+.risk-badge.risk-low {
+  @apply bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200;
+}
+
+.risk-badge.risk-medium {
+  @apply bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200;
+}
+
+.risk-badge.risk-high {
+  @apply bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200;
+}
+
+.risk-details {
+  @apply space-y-1;
+}
+
+.risk-row {
+  @apply flex items-center justify-between text-xs text-gray-600 dark:text-gray-400;
+}
+
+/* =============================================================================
+   VALIDATION ERRORS
+   ============================================================================= */
+
+.validation-errors {
+  @apply space-y-1;
+}
+
+.error-message {
+  @apply text-sm text-red-600 dark:text-red-400;
+}
+
+/* =============================================================================
+   ALERTS
+   ============================================================================= */
+
+.order-error {
+  @apply p-3 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-md;
+}
+
+.order-error span {
+  @apply text-sm text-red-800 dark:text-red-200;
+}
+
+.order-success {
+  @apply p-3 bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 rounded-md;
+}
+
+.order-success span {
+  @apply text-sm text-green-800 dark:text-green-200;
+}
+
+/* =============================================================================
+   SUBMIT BUTTON
+   ============================================================================= */
+
+.submit-button {
+  @apply w-full mt-2;
+}
+
+.submit-button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+
+/* Small screens */
+@media (max-width: 640px) {
+  .order-form {
+    @apply p-3 space-y-3;
+  }
+
+  .form-summary {
+    @apply p-2;
+  }
+
+  .risk-metrics {
+    @apply p-2;
+  }
+
+  .order-form-header h3 {
+    @apply text-base;
+  }
+
+  .balance-display {
+    @apply text-xs;
+  }
+}
+
+/* =============================================================================
+   ANIMATIONS
+   ============================================================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.risk-metrics {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.order-error,
+.order-success {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* =============================================================================
+   FOCUS STATES
+   ============================================================================= */
+
+.form-select:focus-visible,
+.form-input:focus-visible {
+  @apply ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900;
+}
+
+.side-button:focus-visible {
+  @apply ring-2 ring-offset-2;
+}
+
+.side-button.side-buy:focus-visible {
+  @apply ring-green-500;
+}
+
+.side-button.side-sell:focus-visible {
+  @apply ring-red-500;
+}
+
+/* =============================================================================
+   DARK MODE SPECIFIC
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .order-form-card {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.26);
+  }
+}
+
+/* =============================================================================
+   ACCESSIBILITY
+   ============================================================================= */
+
+@media (prefers-contrast: high) {
+  .risk-badge.risk-low {
+    @apply bg-green-300 dark:bg-green-700 text-green-900 dark:text-green-100;
+  }
+
+  .risk-badge.risk-medium {
+    @apply bg-yellow-300 dark:bg-yellow-700 text-yellow-900 dark:text-yellow-100;
+  }
+
+  .risk-badge.risk-high {
+    @apply bg-red-300 dark:bg-red-700 text-red-900 dark:text-red-100;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .risk-metrics,
+  .order-error,
+  .order-success {
+    animation: none;
+  }
+
+  .submit-button,
+  .form-select,
+  .form-input {
+    transition: none;
+  }
+}
