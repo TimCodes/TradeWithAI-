@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Sse, Req } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { LLMService, ChatMessage } from './llm.service';
 import { TradingContextService } from './services/trading-context.service';
+import { parseTradeSignal } from './utils/signal-parser';
 
 @Controller('llm')
 export class LLMController {
@@ -56,7 +57,26 @@ export class LLMController {
     }
     
     const response = await this.llmService.chat(provider, processedMessages, stream);
-    return { response };
+    
+    // Parse response for trade signals
+    const signalResult = parseTradeSignal(response, provider);
+    
+    return { 
+      response,
+      signals: signalResult.hasSignal ? signalResult.signals : [],
+    };
+  }
+
+  @Post('parse-signal')
+  parseSignal(
+    @Body() body: { 
+      text: string; 
+      provider?: string;
+      messageId?: string;
+    },
+  ) {
+    const { text, provider, messageId } = body;
+    return parseTradeSignal(text, provider, messageId);
   }
 
   @Sse('chat/stream/:provider')

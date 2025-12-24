@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { LLMState, ChatMessage, LLMProvider } from '../types/store.types';
+import type { TradeSignal } from '@alpha-arena/shared';
 
 const initialState = {
   messages: [],
+  signals: [] as TradeSignal[],
   currentProvider: 'openai',
   providers: [
     { id: 'openai', name: 'OpenAI GPT-4', enabled: true },
@@ -86,6 +88,48 @@ export const useLLMStore = create<LLMState>()(
 
       setError: (error: string | null) =>
         set({ error }, false, 'setError'),
+
+      // Signal actions
+      addSignal: (signal: TradeSignal) =>
+        set(
+          (state) => ({
+            signals: [...state.signals, signal],
+          }),
+          false,
+          'addSignal'
+        ),
+
+      addSignals: (signals: TradeSignal[]) =>
+        set(
+          (state) => ({
+            signals: [...state.signals, ...signals],
+          }),
+          false,
+          'addSignals'
+        ),
+
+      updateSignal: (id: string, updates: Partial<TradeSignal>) =>
+        set(
+          (state) => ({
+            signals: state.signals.map((sig) =>
+              sig.id === id ? { ...sig, ...updates } : sig
+            ),
+          }),
+          false,
+          'updateSignal'
+        ),
+
+      removeSignal: (id: string) =>
+        set(
+          (state) => ({
+            signals: state.signals.filter((sig) => sig.id !== id),
+          }),
+          false,
+          'removeSignal'
+        ),
+
+      clearSignals: () =>
+        set({ signals: [] }, false, 'clearSignals'),
 
       // Reset
       reset: () =>

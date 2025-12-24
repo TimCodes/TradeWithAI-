@@ -109,23 +109,36 @@ export interface LLMProvider {
 
 export interface LLMState {
   messages: ChatMessage[];
+  signals: import('@alpha-arena/shared').TradeSignal[];
   currentProvider: string;
   providers: LLMProvider[];
   isStreaming: boolean;
   isLoading: boolean;
   error: string | null;
   
-  // Actions
+  // Message actions
   addMessage: (message: ChatMessage) => void;
   updateMessage: (id: string, updates: Partial<ChatMessage>) => void;
   removeMessage: (id: string) => void;
   clearMessages: () => void;
+  
+  // Provider actions
   setCurrentProvider: (providerId: string) => void;
   setProviders: (providers: LLMProvider[]) => void;
   updateProvider: (id: string, updates: Partial<LLMProvider>) => void;
+  
+  // Signal actions
+  addSignal: (signal: import('@alpha-arena/shared').TradeSignal) => void;
+  addSignals: (signals: import('@alpha-arena/shared').TradeSignal[]) => void;
+  updateSignal: (id: string, updates: Partial<import('@alpha-arena/shared').TradeSignal>) => void;
+  removeSignal: (id: string) => void;
+  clearSignals: () => void;
+  
+  // UI state actions
   setStreaming: (isStreaming: boolean) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
+  
   reset: () => void;
 }
 
