@@ -3,6 +3,7 @@ export { useTradingStore } from './useTradingStore';
 export { useLLMStore } from './useLLMStore';
 export { useMarketDataStore } from './useMarketDataStore';
 export { useAuthStore } from './useAuthStore';
+export { useArenaStore } from './useArenaStore';
 
 // Re-export types for convenience
 export type {

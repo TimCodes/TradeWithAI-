@@ -3,6 +3,7 @@ import { Card } from './ui/card';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ContextDisplay } from './ContextDisplay';
+import { TradeSignalCard } from './TradeSignalCard';
 import { useLLMStore } from '../stores';
 import { useSendMessage, useChatHistory, useProviders } from '../hooks/useApi';
 import { useLLMStream } from '../hooks/useLLMStream';
@@ -32,7 +33,7 @@ export const LLMChatBox = ({ sessionId, className = '' }: LLMChatBoxProps) => {
   const [includeContext, setIncludeContext] = useState(true); // NEW: Toggle for trading context
 
   // Zustand store
-  const { messages, addMessage } = useLLMStore();
+  const { messages, addMessage, signals, addSignals, updateSignal, removeSignal } = useLLMStore();
 
   // React Query hooks
   const { data: chatHistory, isLoading: isLoadingHistory } = useChatHistory(sessionId);
@@ -107,11 +108,16 @@ export const LLMChatBox = ({ sessionId, className = '' }: LLMChatBoxProps) => {
 
     // Send message via API (WebSocket will handle the streaming response)
     try {
-      await sendMessageMutation.mutateAsync({
+      const response = await sendMessageMutation.mutateAsync({
         message: content,
         provider: selectedProvider,
         includeContext, // Use the toggle state
       });
+      
+      // Check if response contains signals
+      if (response && response.signals && response.signals.length > 0) {
+        addSignals(response.signals);
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
       addMessage({
@@ -121,6 +127,18 @@ export const LLMChatBox = ({ sessionId, className = '' }: LLMChatBoxProps) => {
         timestamp: new Date(),
       });
     }
+  };
+
+  const handleExecuteSignal = async (signalId: string) => {
+    // Mark signal as being executed
+    updateSignal(signalId, { executed: true, executedAt: new Date() });
+    
+    // TODO: Actually execute the trade via trading service
+    console.log('Executing signal:', signalId);
+  };
+
+  const handleDismissSignal = (signalId: string) => {
+    removeSignal(signalId);
   };
 
   const isSending = sendMessageMutation.isPending;
@@ -242,6 +260,23 @@ export const LLMChatBox = ({ sessionId, className = '' }: LLMChatBoxProps) => {
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
+
+        {/* Trade Signals */}
+        {signals.length > 0 && (
+          <div className="space-y-2">
+            {signals
+              .filter((sig) => !sig.executed)
+              .map((signal) => (
+                <TradeSignalCard
+                  key={signal.id}
+                  signal={signal}
+                  onExecute={handleExecuteSignal}
+                  onDismiss={handleDismissSignal}
+                  isExecuting={false}
+                />
+              ))}
+          </div>
+        )}
 
         {/* Typing Indicator */}
         {isStreaming && (

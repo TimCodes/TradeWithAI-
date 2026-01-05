@@ -179,3 +179,6 @@ export const CHART_INTERVALS = [
 export type TradingPair = typeof TRADING_PAIRS[number];
 export type LLMProvider = typeof LLM_PROVIDERS[number];
 export type ChartInterval = typeof CHART_INTERVALS[number];
+
+// Trade Signal Types
+export * from './types/trade-signal';

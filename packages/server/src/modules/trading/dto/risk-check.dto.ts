@@ -6,46 +6,6 @@ export enum RiskCheckStatus {
   WARNING = 'warning',
 }
 
-export class RiskCheckRequestDto {
-  @IsString()
-  userId: string;
-
-  @IsString()
-  symbol: string;
-
-  @IsEnum(['buy', 'sell'])
-  side: 'buy' | 'sell';
-
-  @IsNumber()
-  @Min(0)
-  size: number;
-
-  @IsNumber()
-  @Min(0)
-  price: number;
-
-  @IsEnum(['market', 'limit'])
-  @IsOptional()
-  orderType?: 'market' | 'limit';
-}
-
-export class RiskCheckResponseDto {
-  @IsEnum(RiskCheckStatus)
-  status: RiskCheckStatus;
-
-  @IsBoolean()
-  approved: boolean;
-
-  @IsString({ each: true })
-  reasons: string[];
-
-  @IsOptional()
-  riskMetrics?: RiskMetrics;
-
-  @IsOptional()
-  suggestions?: string[];
-}
-
 export class RiskMetrics {
   @IsNumber()
   positionSizeUsd: number;
@@ -85,6 +45,46 @@ export class RiskMetrics {
 
   @IsBoolean()
   exceedsDailyLossLimit: boolean;
+}
+
+export class RiskCheckRequestDto {
+  @IsString()
+  userId: string;
+
+  @IsString()
+  symbol: string;
+
+  @IsEnum(['buy', 'sell'])
+  side: 'buy' | 'sell';
+
+  @IsNumber()
+  @Min(0)
+  size: number;
+
+  @IsNumber()
+  @Min(0)
+  price: number;
+
+  @IsEnum(['market', 'limit'])
+  @IsOptional()
+  orderType?: 'market' | 'limit';
+}
+
+export class RiskCheckResponseDto {
+  @IsEnum(RiskCheckStatus)
+  status: RiskCheckStatus;
+
+  @IsBoolean()
+  approved: boolean;
+
+  @IsString({ each: true })
+  reasons: string[];
+
+  @IsOptional()
+  riskMetrics?: RiskMetrics;
+
+  @IsOptional()
+  suggestions?: string[];
 }
 
 export class UpdateRiskSettingsDto {
