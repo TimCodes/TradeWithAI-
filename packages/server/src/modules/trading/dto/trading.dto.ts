@@ -345,3 +345,96 @@ export class PortfolioSummaryDto {
   @ApiProperty()
   totalPnl: string;
 }
+
+// Portfolio Analytics DTOs
+
+export enum TimeframeDto {
+  DAY = '24h',
+  WEEK = '7d',
+  MONTH = '30d',
+  ALL = 'all',
+}
+
+export class EquityPointDto {
+  @ApiProperty({ description: 'Timestamp of the data point' })
+  timestamp: Date;
+
+  @ApiProperty({ description: 'Portfolio value at this point' })
+  value: number;
+
+  @ApiProperty({ description: 'Cumulative P&L at this point' })
+  totalPnl: number;
+}
+
+export class EquityCurveDto {
+  @ApiProperty({ type: [EquityPointDto] })
+  data: EquityPointDto[];
+
+  @ApiProperty({ enum: TimeframeDto })
+  timeframe: TimeframeDto;
+}
+
+export class AssetAllocationItemDto {
+  @ApiProperty({ description: 'Trading symbol', example: 'XXBTZUSD' })
+  symbol: string;
+
+  @ApiProperty({ description: 'Position value in USD' })
+  value: number;
+
+  @ApiProperty({ description: 'Percentage of total portfolio' })
+  percentage: number;
+
+  @ApiProperty({ description: 'Unrealized P&L for this position' })
+  unrealizedPnl: number;
+}
+
+export class AssetAllocationDto {
+  @ApiProperty({ type: [AssetAllocationItemDto] })
+  allocations: AssetAllocationItemDto[];
+
+  @ApiProperty({ description: 'Total portfolio value' })
+  totalValue: number;
+}
+
+export class PortfolioMetricsDto {
+  @ApiProperty({ description: 'Total portfolio value' })
+  totalValue: number;
+
+  @ApiProperty({ description: 'Total P&L (realized + unrealized)' })
+  totalPnl: number;
+
+  @ApiProperty({ description: 'Realized P&L from closed positions' })
+  realizedPnl: number;
+
+  @ApiProperty({ description: 'Unrealized P&L from open positions' })
+  unrealizedPnl: number;
+
+  @ApiProperty({ description: 'Return on Investment percentage' })
+  roi: number;
+
+  @ApiProperty({ description: 'Maximum drawdown percentage' })
+  maxDrawdown: number;
+
+  @ApiProperty({ description: 'Sharpe ratio (risk-adjusted return)' })
+  sharpeRatio: number;
+
+  @ApiProperty({ description: 'Win rate percentage' })
+  winRate: number;
+
+  @ApiProperty({ description: 'Total number of closed trades' })
+  totalTrades: number;
+
+  @ApiProperty({ enum: TimeframeDto })
+  timeframe: TimeframeDto;
+}
+
+export class TimeframeQueryDto {
+  @ApiPropertyOptional({
+    description: 'Timeframe for data',
+    enum: TimeframeDto,
+    default: TimeframeDto.ALL,
+  })
+  @IsEnum(TimeframeDto)
+  @IsOptional()
+  timeframe?: TimeframeDto = TimeframeDto.ALL;
+}

@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TradingService } from '../services/trading.service';
+import { PortfolioService } from '../services/portfolio.service';
 import {
   CreateOrderDto,
   OrderQueryDto,
@@ -22,6 +23,11 @@ import {
   PositionResponseDto,
   TradeResponseDto,
   PortfolioSummaryDto,
+  EquityCurveDto,
+  AssetAllocationDto,
+  PortfolioMetricsDto,
+  TimeframeQueryDto,
+  TimeframeDto,
 } from '../dto/trading.dto';
 
 // Note: JwtAuthGuard would be imported from auth module
@@ -33,7 +39,10 @@ import {
 // @UseGuards(JwtAuthGuard) // Uncomment when auth is set up
 @ApiBearerAuth()
 export class TradingController {
-  constructor(private readonly tradingService: TradingService) {}
+  constructor(
+    private readonly tradingService: TradingService,
+    private readonly portfolioService: PortfolioService,
+  ) {}
 
   // ========== Order Endpoints ==========
 
@@ -146,5 +155,54 @@ export class TradingController {
   async getBalance(@Request() req: any) {
     const userId = req.user?.id || 'test-user-id';
     return this.tradingService.getBalance(userId);
+  }
+
+  @Get('portfolio/equity-curve')
+  @ApiOperation({ summary: 'Get equity curve over time' })
+  @ApiResponse({ status: 200, description: 'Equity curve data', type: EquityCurveDto })
+  async getEquityCurve(
+    @Request() req: any,
+    @Query() query: TimeframeQueryDto,
+  ): Promise<EquityCurveDto> {
+    const userId = req.user?.id || 'test-user-id';
+    const timeframe = query.timeframe || TimeframeDto.ALL;
+    const data = await this.portfolioService.getEquityCurve(userId, timeframe as any);
+    
+    return {
+      data,
+      timeframe,
+    };
+  }
+
+  @Get('portfolio/allocation')
+  @ApiOperation({ summary: 'Get asset allocation across portfolio' })
+  @ApiResponse({ status: 200, description: 'Asset allocation data', type: AssetAllocationDto })
+  async getAssetAllocation(@Request() req: any): Promise<AssetAllocationDto> {
+    const userId = req.user?.id || 'test-user-id';
+    const allocations = await this.portfolioService.getAssetAllocation(userId);
+    
+    const totalValue = allocations.reduce((sum, item) => sum + item.value, 0);
+    
+    return {
+      allocations,
+      totalValue,
+    };
+  }
+
+  @Get('portfolio/metrics')
+  @ApiOperation({ summary: 'Get comprehensive portfolio metrics' })
+  @ApiResponse({ status: 200, description: 'Portfolio metrics', type: PortfolioMetricsDto })
+  async getPortfolioMetrics(
+    @Request() req: any,
+    @Query() query: TimeframeQueryDto,
+  ): Promise<PortfolioMetricsDto> {
+    const userId = req.user?.id || 'test-user-id';
+    const timeframe = query.timeframe || TimeframeDto.ALL;
+    const metrics = await this.portfolioService.getPortfolioMetrics(userId, timeframe as any);
+    
+    return {
+      ...metrics,
+      timeframe,
+    };
   }
 }

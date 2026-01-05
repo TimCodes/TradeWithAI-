@@ -8,6 +8,7 @@ import { TradingService } from './services/trading.service';
 import { OrderExecutorService } from './services/order-executor.service';
 import { TradingEventsService } from './services/trading-events.service';
 import { RiskManagementService } from './services/risk-management.service';
+import { PortfolioService } from './services/portfolio.service';
 import { KrakenController } from './controllers/kraken.controller';
 import { TradingController } from './controllers/trading.controller';
 import { TradingHealthController } from './controllers/health.controller';
@@ -53,6 +54,7 @@ import { RiskSettings } from './entities/risk-settings.entity';
     OrderExecutorService,
     TradingEventsService,
     RiskManagementService,
+    PortfolioService,
   ],
   exports: [
     KrakenService,
@@ -60,6 +62,7 @@ import { RiskSettings } from './entities/risk-settings.entity';
     OrderExecutorService,
     TradingEventsService,
     RiskManagementService,
+    PortfolioService,
   ],
 })
 export class TradingModule {}
