@@ -4,6 +4,7 @@ export { useLLMStore } from './useLLMStore';
 export { useMarketDataStore } from './useMarketDataStore';
 export { useAuthStore } from './useAuthStore';
 export { useArenaStore } from './useArenaStore';
+export { usePortfolioStore } from './usePortfolioStore';
 
 // Re-export types for convenience
 export type {
