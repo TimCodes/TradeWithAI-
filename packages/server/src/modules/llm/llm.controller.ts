@@ -79,6 +79,80 @@ export class LLMController {
     return parseTradeSignal(text, provider, messageId);
   }
 
+  @Post('compare')
+  async compareProviders(
+    @Body() body: {
+      message: string;
+      providers: string[];
+      includeContext?: boolean;
+    },
+    @Req() req: any,
+  ) {
+    const { message, providers, includeContext = false } = body;
+    
+    // Build messages array
+    let messages: ChatMessage[] = [
+      {
+        role: 'user',
+        content: message,
+      },
+    ];
+    
+    // Inject trading context if requested
+    if (includeContext) {
+      const userId = req.user?.id || 'demo-user';
+      const context = await this.tradingContextService.getTradingContext(userId);
+      const contextPrompt = this.tradingContextService.formatContextPrompt(context);
+      
+      // Add context as a system message before the user's message
+      messages = [
+        {
+          role: 'system' as const,
+          content: contextPrompt,
+        },
+        ...messages,
+      ];
+    }
+    
+    // Call all providers in parallel
+    const startTimes = new Map<string, number>();
+    const promises = providers.map(async (provider) => {
+      startTimes.set(provider, Date.now());
+      
+      try {
+        const response = await this.llmService.chat(provider, messages, false);
+        const responseTime = Date.now() - startTimes.get(provider)!;
+        
+        // Parse for signals
+        const signalResult = parseTradeSignal(response, provider);
+        
+        return {
+          provider,
+          response,
+          responseTime,
+          signals: signalResult.hasSignal ? signalResult.signals : [],
+          error: null,
+        };
+      } catch (error) {
+        return {
+          provider,
+          response: '',
+          responseTime: Date.now() - startTimes.get(provider)!,
+          signals: [],
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
+    });
+    
+    const results = await Promise.all(promises);
+    
+    return {
+      results,
+      message,
+      timestamp: new Date(),
+    };
+  }
+
   @Sse('chat/stream/:provider')
   streamChat(
     @Param('provider') provider: string,
