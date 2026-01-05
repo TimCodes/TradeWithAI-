@@ -642,20 +642,30 @@ TradeWithAI is an AI-powered autonomous trading platform currently in active dev
 **8.1 Portfolio Overview**
 - **Story Points**: 5
 - **Description**: As a trader, I want to see my portfolio performance over time
+- **Status**: ✅ **COMPLETE** (January 5, 2026)
 - **Acceptance Criteria**:
-  - [ ] Display equity curve chart
-  - [ ] Show total portfolio value
-  - [ ] Display asset allocation pie chart
-  - [ ] Show total P&L and ROI
-  - [ ] Add timeframe selector (24h, 7d, 30d, all)
-  - [ ] Display max drawdown
-  - [ ] Show Sharpe ratio
+  - [x] Display equity curve chart
+  - [x] Show total portfolio value
+  - [x] Display asset allocation pie chart
+  - [x] Show total P&L and ROI
+  - [x] Add timeframe selector (24h, 7d, 30d, all)
+  - [x] Display max drawdown
+  - [x] Show Sharpe ratio
 - **Dependencies**: Epic 1, Epic 4
-- **Files to Modify**:
-  - `packages/client/src/pages/Portfolio.tsx`
-- **Files to Create**:
-  - `packages/client/src/components/EquityCurve.tsx`
-  - `packages/client/src/components/AssetAllocation.tsx`
+- **Files Created**:
+  - `packages/server/src/modules/trading/services/portfolio.service.ts` ✅
+  - `packages/client/src/stores/usePortfolioStore.ts` ✅
+  - `packages/client/src/components/EquityCurve.tsx` ✅
+  - `packages/client/src/components/AssetAllocation.tsx` ✅
+  - `packages/client/src/components/PortfolioMetrics.tsx` ✅
+  - `STORY_8.1_COMPLETE.md` ✅
+  - `STORY_8.1_SUMMARY.md` ✅
+- **Files Modified**:
+  - `packages/server/src/modules/trading/dto/trading.dto.ts` ✅
+  - `packages/server/src/modules/trading/controllers/trading.controller.ts` ✅
+  - `packages/server/src/modules/trading/trading.module.ts` ✅
+  - `packages/client/src/pages/Portfolio.tsx` ✅
+  - `packages/client/src/stores/index.ts` ✅
 
 **8.2 Trade History**
 - **Story Points**: 3
