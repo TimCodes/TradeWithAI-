@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ModelComparisonPanel } from '../components/ModelComparisonPanel';
+import { ModelPerformanceStats } from '../components/ModelPerformanceStats';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { useArenaStore, selectCurrentPanels } from '../stores/useArenaStore';
@@ -241,6 +242,9 @@ export function LLMArena() {
           </div>
         </Card>
       )}
+
+      {/* Model Performance Stats */}
+      <ModelPerformanceStats className="w-full" />
 
       {/* Model Comparison Panels */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">

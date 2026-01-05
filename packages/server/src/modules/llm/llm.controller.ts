@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Param, Sse, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Sse, Req, Query } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { LLMService, ChatMessage } from './llm.service';
 import { TradingContextService } from './services/trading-context.service';
+import { LlmAnalyticsService } from './services/llm-analytics.service';
 import { parseTradeSignal } from './utils/signal-parser';
 
 @Controller('llm')
@@ -9,6 +10,7 @@ export class LLMController {
   constructor(
     private llmService: LLMService,
     private tradingContextService: TradingContextService,
+    private llmAnalyticsService: LlmAnalyticsService,
   ) {}
 
   @Get('providers')
@@ -171,5 +173,116 @@ export class LLMController {
         }
       })();
     });
+  }
+
+  @Get('analytics')
+  async getModelPerformanceStats(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Req() req?: any,
+  ) {
+    const userId = req?.user?.id || 'demo-user';
+    
+    const dateRange = {
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    };
+    
+    const stats = await this.llmAnalyticsService.getModelPerformanceStats(
+      userId,
+      dateRange,
+    );
+    
+    return {
+      stats,
+      dateRange,
+      timestamp: new Date(),
+    };
+  }
+
+  @Get('analytics/:provider')
+  async getProviderStats(
+    @Param('provider') provider: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Req() req?: any,
+  ) {
+    const userId = req?.user?.id || 'demo-user';
+    
+    const dateRange = {
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    };
+    
+    const stats = await this.llmAnalyticsService.getProviderPerformanceStats(
+      userId,
+      provider,
+      dateRange,
+    );
+    
+    return {
+      stats,
+      provider,
+      dateRange,
+      timestamp: new Date(),
+    };
+  }
+
+  @Get('analytics/compare/:provider1/:provider2')
+  async compareProviderStats(
+    @Param('provider1') provider1: string,
+    @Param('provider2') provider2: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Req() req?: any,
+  ) {
+    const userId = req?.user?.id || 'demo-user';
+    
+    const dateRange = {
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    };
+    
+    const comparison = await this.llmAnalyticsService.compareProviders(
+      userId,
+      provider1,
+      provider2,
+      dateRange,
+    );
+    
+    return {
+      ...comparison,
+      dateRange,
+      timestamp: new Date(),
+    };
+  }
+
+  @Get('analytics/top/:limit')
+  async getTopProviders(
+    @Param('limit') limit: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Req() req?: any,
+  ) {
+    const userId = req?.user?.id || 'demo-user';
+    const limitNum = parseInt(limit, 10) || 5;
+    
+    const dateRange = {
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    };
+    
+    const topProviders = await this.llmAnalyticsService.getTopProviders(
+      userId,
+      limitNum,
+      dateRange,
+    );
+    
+    return {
+      topProviders,
+      limit: limitNum,
+      dateRange,
+      timestamp: new Date(),
+    };
   }
 }
